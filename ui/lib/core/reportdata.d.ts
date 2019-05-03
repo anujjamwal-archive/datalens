@@ -1,13 +1,36 @@
-type DataProviderState = "WAITING" | "READY";
-
-interface IObserver<T> {
-  onChange: (provider: IDataProvider<T>) => void;
-}
+type ChangeHandler<T> = (provider: IDataProvider<T>) => void;
 
 interface IDataProvider<T> {
-  state: DataProviderState;
   lastUpdated: () => number;
   output: () => T;
-  subscribe: (observer: IObserver<T>) => void;
-  unsubscribe: (observer: IObserver<T>) => void;
+  onChange: (arg0: ChangeHandler<T>) => void;
+}
+
+type CompoundFilterType = "and" | "or";
+type FilterType = "terms";
+
+type IFilter = {
+  type: FilterType
+  field: string
+  values: any[],
+} | {
+  type: CompoundFilterType
+  filters: IFilter[],
+};
+
+interface IQuery {
+  metrics: IMetric[];
+  filters?: IFilter;
+  order?: string[];
+}
+
+interface IMetric {
+  aggregationFn: string;
+  field: string;
+  alias: string;
+}
+
+export interface IFetchRequest {
+  url: RequestInfo;
+  request?: RequestInit;
 }

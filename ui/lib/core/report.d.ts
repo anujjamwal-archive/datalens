@@ -1,4 +1,5 @@
 import { Color } from "csstype";
+import { IMetric, IFilter } from "./reportdata";
 
 interface IHeader {
   id: string;
@@ -10,6 +11,7 @@ type Direction = "row" | "row-reverse" | "column" | "column-reverse";
 
 interface ILinearLayout {
   id: string;
+  type: "LinearLayout";
   direction: Direction;
   paddingTop: number;
   paddingLeft: number;
@@ -24,6 +26,7 @@ interface ILinearLayout {
 
 interface IKPI {
   id: string;
+  type: "KPI";
   display: {
     height: number;
     width: number;
@@ -40,12 +43,8 @@ interface IKPI {
   };
   data: {
     source: string;
-    metric: {
-      aggregationFn: string;
-      field: string;
-      alias: string;
-    };
-    filter?: {}
+    metric: IMetric;
+    filter?: IFilter;
   };
   properties: {
     color?: Array<{color: Color; threshold?: number;}>;
@@ -64,7 +63,7 @@ interface IPage {
   component: IComponent;
 }
 
-interface IReport {
+interface IDashboard {
   id: string;
   header: IHeader;
   pages: Array<IPage>;
@@ -72,11 +71,11 @@ interface IReport {
 
 export {
   IComponent,
+  IDashboard,
   IHeader,
   IKPI,
   ILayout,
   ILinearLayout,
   IPage,
-  IReport,
   IWidget,
 };
