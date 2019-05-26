@@ -1,11 +1,14 @@
 import { Color } from "csstype";
 import { IMetric, IFilter } from "./reportdata";
+import { CSSProperties } from "react";
 
 interface IHeader {
   id: string;
   heading: string;
-  subheading: string;
+  subheading?: string;
 }
+
+type Device = "small" | "iphone" | "iphone-landscape" | "ipad" | "ipad-landscape" | "desktop";
 
 type Direction = "row" | "row-reverse" | "column" | "column-reverse";
 
@@ -21,7 +24,7 @@ interface ILinearLayout {
   marginLeft: number;
   marginRight: number;
   marginBottom: number;
-  children?: Array<IComponent>;
+  childComponents?: IComponent[];
 }
 
 interface IKPI {
@@ -52,7 +55,27 @@ interface IKPI {
   };
 }
 
-type IWidget = IKPI;
+interface IPanel {
+  id: string;
+  type: "Panel" | "FilterPanel";
+  display: {
+    height: number;
+    width: number;
+    paddingTop?: number;
+    paddingLeft?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    marginTop?: number;
+    marginLeft?: number;
+    marginRight?: number;
+    marginBottom?: number;
+    cornerRadius?: number;
+    backgroundColor?: Color;
+  };
+  childComponents?: Array<IComponent>;
+}
+
+type IWidget = IKPI | IPanel;
 
 type IComponent = ILayout | IWidget;
 
@@ -70,6 +93,7 @@ interface IDashboard {
 }
 
 export {
+  Device,
   IComponent,
   IDashboard,
   IHeader,
@@ -77,5 +101,6 @@ export {
   ILayout,
   ILinearLayout,
   IPage,
+  IPanel,
   IWidget,
 };

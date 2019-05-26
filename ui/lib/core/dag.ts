@@ -1,4 +1,4 @@
-import { IQuery, IFilter, IFetchRequest } from "./reportdata";
+import { IQuery, IFilter, IFetchRequest, ChangeHandler, IDataProvider } from "./reportdata";
 
 export abstract class DagNode {
   private _id: string;
@@ -6,12 +6,14 @@ export abstract class DagNode {
   protected predecessors: DagNode[];
   protected successors: DagNode[];
   private _lastProcessed: number;
+  private _handers: ChangeHandler<any>[];
 
   constructor(id: string) {
     this._id = id;
     this.predecessors = [];
     this.successors = [];
     this._lastProcessed = 0;
+    this._handers = [];
   }
   
   public async abstract process(): Promise<any>;
@@ -26,6 +28,7 @@ export abstract class DagNode {
 
   protected setOutput(val: any) {
     this._output = val;
+    this._handers.forEach(h => h(this))
   }
 
   async processAndTriggerSuccessors() {
@@ -45,6 +48,10 @@ export abstract class DagNode {
 
   public lastUpdated() {
     return this._lastProcessed;
+  }
+
+  public onChange(handler: ChangeHandler<any>) {
+    this._handers.push(handler);
   }
 }
 
