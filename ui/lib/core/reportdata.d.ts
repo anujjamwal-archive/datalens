@@ -1,3 +1,4 @@
+type StateListener<S> = (state: S) => void
 type ChangeHandler<T> = (provider: IDataProvider<T>) => void;
 
 interface IDataProvider<T> {

@@ -1,12 +1,13 @@
-import { IQuery, IFilter, IFetchRequest, ChangeHandler, IDataProvider } from "./reportdata";
+import { IQuery, IFilter, IFetchRequest, ChangeHandler, IDataProvider, StateListener } from "./reportdata";
 
 export abstract class DagNode {
   private _id: string;
-  private _output?: any;
+  protected _output?: any;
   protected predecessors: DagNode[];
   protected successors: DagNode[];
   private _lastProcessed: number;
   private _handers: ChangeHandler<any>[];
+  private listener?: StateListener<"Waiting" | "Ready">;
 
   constructor(id: string) {
     this._id = id;
@@ -16,7 +17,7 @@ export abstract class DagNode {
     this._handers = [];
   }
   
-  public async abstract process(): Promise<any>;
+  protected async abstract process(): Promise<any>;
 
   id() {
     return this._id;
@@ -28,12 +29,14 @@ export abstract class DagNode {
 
   protected setOutput(val: any) {
     this._output = val;
+    this._lastProcessed = new Date().getTime();
+    this.listener && this.listener("Ready");
     this._handers.forEach(h => h(this))
   }
 
   async processAndTriggerSuccessors() {
+    this.listener && this.listener("Waiting");
     await this.process();
-    this._lastProcessed = new Date().getTime();
     for (const node of this.successors) {
       await node.processAndTriggerSuccessors();
     }
@@ -43,7 +46,7 @@ export abstract class DagNode {
 
   public addSuccessor(node: DagNode) {
     this.successors.push(node);
-    this.predecessors.push(this);
+    node.predecessors.push(this);
   }
 
   public lastUpdated() {
@@ -53,37 +56,58 @@ export abstract class DagNode {
   public onChange(handler: ChangeHandler<any>) {
     this._handers.push(handler);
   }
+
+  public onChangeState(listener: StateListener<"Waiting" | "Ready">) {
+    this.listener = listener;
+  }
 }
 
 export class Dag {
   private _id: string;
+  private triggers: DagNode[]
   private nodes: Map<string, DagNode>;
 
   constructor(id: string) {
     this._id = id;
     this.nodes = new Map();
+    this.triggers = [];
   }
 
-  variable(id: string) {
-    return new VariableNode(id);
+  trigger(id: string) {
+    const node = this.variable(id);
+    this.triggers.push(node);
+    return node;
+  }
+
+  variable(id: string, defValue?: any) {
+    const node = new VariableNode(id, defValue);
+    this.nodes.set(id, node);
+    return node;
   }
 
   func(id: string, fn: (input: any) => any) {
-    return new FunctionNode(id, fn);
+    const node = new FunctionNode(id, fn);
+    this.nodes.set(id, node);
+    return node;
   }
 
   query(id: string, datasetId: string, query: IQuery) {
-    return new QueryNode(id, datasetId, query);
+    const node = new QueryNode(id, datasetId, query);
+    this.nodes.set(id, node);
+    return node;
   }
 
   identity(id: string) {
-    return new IdentityNode(id);
+    const node = new IdentityNode(id);
+    this.nodes.set(id, node);
+    return node;
   }
 }
 
 class VariableNode extends DagNode {
-  constructor(id: string) {
+  constructor(id: string, def?: any) {
     super(id);
+    this._output = def;
   }
 
   async assign(value: any) {
@@ -113,7 +137,6 @@ class FunctionNode extends DagNode {
         this.setOutput(output);
       }
 
-      this.processAndTriggerSuccessors();
       return Promise.resolve(true);
   }
 }

@@ -51,7 +51,7 @@ const dashboard: IDashboard = {
                 },
                 childComponents: [
                   {
-                    id: "string;",
+                    id: "1231",
                     type: "KPI",
                     display: {
                       height: 100,
@@ -62,11 +62,11 @@ const dashboard: IDashboard = {
                       paddingRight: 10
                     },
                     data: {
-                      source: "",
+                      source: "5ceae5ab330000e0397c3902",
                       metric: {
-                        aggregationFn: "string",
-                        field: "string",
-                        alias: "string"
+                        aggregationFn: "",
+                        field: "",
+                        alias: "sales"
                       }
                     },
                     properties: {}
@@ -83,7 +83,30 @@ const dashboard: IDashboard = {
                   marginBottom: 10,
                   marginLeft: 10,
                   marginRight: 10
-                }
+                },
+                childComponents: [
+                  {
+                    id: "2332",
+                    type: "KPI",
+                    display: {
+                      height: 100,
+                      width: 300,
+                      paddingBottom: 10,
+                      paddingTop: 10,
+                      paddingLeft: 10,
+                      paddingRight: 10
+                    },
+                    data: {
+                      source: "5ceae5ab330000e0397c3902",
+                      metric: {
+                        aggregationFn: "",
+                        field: "",
+                        alias: "sales"
+                      }
+                    },
+                    properties: {}
+                  }
+                ]
               }
             ]
           }

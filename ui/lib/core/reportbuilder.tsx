@@ -34,12 +34,22 @@ export class PageBuilder {
     </Panel>
   }
 
-  buildKpi(c: IKPI): React.ReactChild {    
-    const status = this.dag.variable("myvar");
-    const data = this.dag.variable("myvar");
-    setTimeout(() => status.assign(Math.random() * 100), 5000);
-    setInterval(() => data.assign(Math.random() * 100), 1000);
-    return <KPI key={c.id} spec={c} loadStatusProvider={status} dataProvider={data} />
+  buildKpi(c: IKPI): React.ReactChild {
+    const trigger = this.dag.trigger(c.id + "-trigger");
+    const status = this.dag.variable(c.id + "-status");
+    const query = this.dag.query(c.id + "-query", c.data.source, {metrics: [c.data.metric]})
+    const process = this.dag.func(c.id + "-process", ({data}) => data[0].metrics[c.data.metric.alias])
+    const data = this.dag.identity(c.id);
+
+    trigger.addSuccessor(query);
+    query.addSuccessor(process);
+    process.addSuccessor(data);
+
+    query.onChangeState(state => {
+      status.assign(state)
+    });
+
+    return <KPI key={c.id} spec={c} loadStatusProvider={status} dataProvider={data} onRefresh={() => trigger.assign(0)}/>
   }
 }
 

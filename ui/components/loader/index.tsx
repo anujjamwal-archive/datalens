@@ -1,8 +1,13 @@
 import * as React from "react";
 
-const Loader = () =>
-  <div>
-    <img src={require("./loader.gif")} />
-  </div>
+interface Props {
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+}
+
+const Loader = ({height, width, x, y}: Props) =>
+  <image xlinkHref={require("./loader.gif")} height={height} width={width} x={x} y={y}/>
 
 export default Loader;

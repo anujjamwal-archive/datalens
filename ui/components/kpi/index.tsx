@@ -7,6 +7,7 @@ interface IProps {
   spec: IKPI;
   loadStatusProvider: IDataProvider<any>;
   dataProvider: IDataProvider<any>;
+  onRefresh: () => void;
 }
 
 interface IState {
@@ -19,13 +20,13 @@ export default class KPI extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
+    setTimeout(() => this.props.onRefresh(), 1);
     this.state = { data: null, currentVsn: 0, nextVsn: 1 };
-  }
-
-  public componentWillMount() {
-    this.props.loadStatusProvider.onChange(provider =>
+    
+    this.props.loadStatusProvider.onChange(provider => 
       this.setState({ nextVsn: provider.lastUpdated() })
     );
+
     this.props.dataProvider.onChange(provider =>
       this.setState({
         data: provider.output(),
@@ -35,32 +36,14 @@ export default class KPI extends React.Component<IProps, IState> {
   }
 
   public render() {
-    return this.isLoading() ? (
-      <Loader />
-    ) : (
-      <g style={this.generateStyle()}>
-        <text x="0" y="0">
-          {this.state.data}
-        </text>
-      </g>
-    );
+    return <svg viewBox="0 0 56 18">
+      {this.isLoading() ?
+        <Loader x={23} y={4} height={10} width={10} /> :
+        <text x="50%" y="15" textAnchor="middle">{this.state.data}</text>}
+      </svg>
   }
 
   private isLoading() {
     return this.state.nextVsn > this.state.currentVsn;
-  }
-
-  private generateStyle(): React.CSSProperties {
-    const {display} = this.props.spec;
-    const fontSize = display.height - (display.paddingTop || 0) - (display.paddingBottom || 0);
-    
-    return {
-      ...display,
-      height: display.height - (display.paddingTop || 0) - (display.paddingBottom || 0),
-      width: display.width - (display.paddingLeft || 0) - (display.paddingRight || 0),
-      fontSize: `${fontSize}px`,
-      display: 'inline-block',
-      overflow: 'hidden'
-    };
   }
 }

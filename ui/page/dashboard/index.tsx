@@ -26,19 +26,15 @@ export default class Dashboard extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
-    this.state = {currentPage: 0, pages: [], status: "LOADING"};
-  }
-
-  public componentWillMount() {
     const pages = this.props.spec.pages.map(p => <Page spec={p} />)
     const status = "READY";
 
-    this.setState({pages, status});
+    this.state = {currentPage: 0, pages, status};
   }
 
   public render() {
     return (
-      <div className="dasboard" style={style.root}>
+      <div className="dashboard" style={style.root}>
         <Header spec={this.props.spec.header}></Header>
         {this.state.pages[this.state.currentPage]}
       </div>
