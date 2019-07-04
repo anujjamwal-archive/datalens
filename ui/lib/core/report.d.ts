@@ -8,7 +8,13 @@ interface IHeader {
   subheading?: string;
 }
 
-type Device = "small" | "iphone" | "iphone-landscape" | "ipad" | "ipad-landscape" | "desktop";
+type Device =
+  | "small"
+  | "iphone"
+  | "iphone-landscape"
+  | "ipad"
+  | "ipad-landscape"
+  | "desktop";
 
 type Direction = "row" | "row-reverse" | "column" | "column-reverse";
 
@@ -50,14 +56,40 @@ interface IKPI {
     filter?: IFilter;
   };
   properties: {
-    color?: Array<{color: Color; threshold?: number;}>;
-    backgroundColor?: Array<{color: Color; threshold?: number;}>;
+    color?: Array<{ color: Color; threshold?: number }>;
+    backgroundColor?: Array<{ color: Color; threshold?: number }>;
+  };
+}
+
+interface ISelect {
+  id: string;
+  type: "Select";
+  display: {
+    height: number;
+    width: number;
+    paddingTop?: number;
+    paddingLeft?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    marginTop?: number;
+    marginLeft?: number;
+    marginRight?: number;
+    marginBottom?: number;
+  };
+  data: {
+    source: string;
+    metrics: Array<IMetric>;
+    filter?: IFilter;
+  };
+  properties: {
+    value: string;
+    label: string;
   };
 }
 
 interface IPanel {
   id: string;
-  type: "Panel" | "FilterPanel";
+  type: "Panel";
   display: {
     height: number;
     width: number;
@@ -72,10 +104,10 @@ interface IPanel {
     cornerRadius?: number;
     backgroundColor?: Color;
   };
-  childComponents?: Array<IComponent>;
+  childComponent?: IComponent;
 }
 
-type IWidget = IKPI | IPanel;
+type IWidget = IKPI | IPanel | ISelect;
 
 type IComponent = ILayout | IWidget;
 
@@ -83,6 +115,7 @@ type ILayout = ILinearLayout;
 
 interface IPage {
   id: string;
+  filters?: IComponent;
   component: IComponent;
 }
 
@@ -98,9 +131,10 @@ export {
   IDashboard,
   IHeader,
   IKPI,
+  ISelect,
   ILayout,
   ILinearLayout,
   IPage,
   IPanel,
-  IWidget,
+  IWidget
 };

@@ -23,7 +23,7 @@ export default class Page extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
-    const page = new PageBuilder().build(this.props.spec.component);
+    const page = new PageBuilder().build(this.props.spec);
     this.state = { page };
   }
 

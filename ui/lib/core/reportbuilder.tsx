@@ -1,23 +1,39 @@
 import * as React from "react";
 import { atom } from "derivable";
-import { IComponent, ILinearLayout, IPanel, IKPI, Device } from "./report";
+import {
+  IComponent,
+  ILinearLayout,
+  IPanel,
+  IKPI,
+  Device,
+  ISelect,
+  IPage
+} from "./report";
 import LinearLayout from "../../components/linearlayout";
 import Panel from "../../components/panel";
 import KPI from "../../components/kpi";
+import Select from "../../components/material/select";
+import { IResponse } from "./reportdata";
 
 export class PageBuilder {
-  build(c: IComponent): React.ReactChild {
+  build(c: IPage): React.ReactChild {
+    return <div key={c.id}>{this.buildComponent(c.component)}</div>;
+  }
+
+  buildComponent(c: IComponent): React.ReactChild {
     if (c.type == "LinearLayout")
       return this.buildLinearLayout(c as ILinearLayout);
     if (c.type == "Panel") return this.buildPanel(c as IPanel);
     if (c.type == "KPI") return this.buildKpi(c as IKPI);
+    if (c.type == "Select") return this.buildSelect(c as ISelect);
     return <div />;
   }
 
   buildLinearLayout(c: ILinearLayout): React.ReactChild {
     return (
       <LinearLayout key={c.id} spec={c}>
-        {c.childComponents && c.childComponents.map(child => this.build(child))}
+        {c.childComponents &&
+          c.childComponents.map(child => this.buildComponent(child))}
       </LinearLayout>
     );
   }
@@ -25,9 +41,35 @@ export class PageBuilder {
   buildPanel(c: IPanel): React.ReactChild {
     return (
       <Panel key={c.id} spec={c}>
-        {c.childComponents && c.childComponents.map(child => this.build(child))}
+        {c.childComponent && this.buildComponent(c.childComponent)}
       </Panel>
     );
+  }
+
+  buildSelect(c: ISelect): React.ReactChild {
+    const trigger = atom<number>(1);
+    const status = atom<IStatus>({ status: "LOADING" });
+    const options = [] as Array<{ value: string; label: string }>;
+
+    trigger.react(() => {
+      fetch("http://www.mocky.io/v2/5ceae5ab330000e0397c3902", {
+        method: "POST",
+        mode: "cors",
+        body: "",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+        .then(res => res.json())
+        .then((res: IResponse) => {
+          status.set({ status: "SUCCESS", data: res.data.map(d => d.metrics) });
+        })
+        .catch(res => {
+          status.set({ status: "ERROR", error: res });
+        });
+    });
+
+    return <Select key={c.id} options={options} />;
   }
 
   buildKpi(c: IKPI): React.ReactChild {
