@@ -6,10 +6,13 @@
   "dependencies": {
     "axios": ">=0.18.1",
     "d3": "5.9.2",
+    "derivable": "^2.0.0-beta.3",
     "react": "16.8.6",
+    "react-derivable": "^0.4.0",
     "react-dom": "16.8.6"
   },
   "devDependencies": {
+    "@types/react-derivable": "file:ui/lib/vendor/react-derivable",
     "@types/d3": "5.7.2",
     "@types/enzyme": "^3.1.15",
     "@types/enzyme-adapter-react-16": "^1.0.3",

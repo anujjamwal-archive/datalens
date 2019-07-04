@@ -1,49 +1,39 @@
 import * as React from "react";
 import { IKPI } from "../../lib/core/report";
-import { IDataProvider } from "../../lib/core/reportdata";
+import { pure } from "react-derivable";
 import Loader from "../loader";
+import { IStatus } from "../../lib/core/reportbuilder";
+import { Atom } from "derivable";
 
 interface IProps {
   spec: IKPI;
-  loadStatusProvider: IDataProvider<any>;
-  dataProvider: IDataProvider<any>;
+  isLoading: boolean;
+  data: any;
   onRefresh: () => void;
 }
 
-interface IState {
-  nextVsn: number;
-  currentVsn: number;
-  data: any;
+const KPI: React.SFC<IProps> = ({ isLoading, data, spec }: IProps) => (
+  <svg viewBox="0 0 56 18">
+    {isLoading ? (
+      <Loader x={23} y={4} height={10} width={10} />
+    ) : (
+      <text x="50%" y="15" textAnchor="middle">
+        {data.metrics[spec.data.metric.alias]}
+      </text>
+    )}
+  </svg>
+);
+
+interface Props {
+  spec: IKPI;
+  status: Atom<IStatus>;
+  onRefresh: () => void;
 }
 
-export default class KPI extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
-    super(props);
-
-    setTimeout(() => this.props.onRefresh(), 1);
-    this.state = { data: null, currentVsn: 0, nextVsn: 1 };
-    
-    this.props.loadStatusProvider.onChange(provider => 
-      this.setState({ nextVsn: provider.lastUpdated() })
-    );
-
-    this.props.dataProvider.onChange(provider =>
-      this.setState({
-        data: provider.output(),
-        currentVsn: provider.lastUpdated()
-      })
-    );
-  }
-
-  public render() {
-    return <svg viewBox="0 0 56 18">
-      {this.isLoading() ?
-        <Loader x={23} y={4} height={10} width={10} /> :
-        <text x="50%" y="15" textAnchor="middle">{this.state.data}</text>}
-      </svg>
-  }
-
-  private isLoading() {
-    return this.state.nextVsn > this.state.currentVsn;
-  }
-}
+export default pure((props: Props) => (
+  <KPI
+    {...props}
+    isLoading={props.status.get().status === "LOADING"}
+    data={props.status.get().data}
+  />
+));
